@@ -32,7 +32,7 @@ Here is the general principle of Adxmi Reporting Api
 http://reporting.yyapi.net/v1/data?appid=93ffeb94fd876e87&start_date=2015-12-05&end_date=2015-12-14&dimension=date&product=custom&sign=e07dc14f319c1dc3da855479804db48b
 
 ## Response Field
-### Response Parameter by offer dimension
+### Response Parameter by date dimension
 | Parameter | Description | Type |
 | ---- | ---- | ---- |
 | date | yyyy-mm-dd | date |
