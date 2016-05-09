@@ -22,7 +22,7 @@ Here is the general principle of Adxmi Reporting Api
 | end_date | The date you wish to end with | date (yyyy-mm-dd) | Y |
 | sign | Signature for query parameters. See [Signature Algorithm](#sign-algo) for detail | string | Y |
 | dimension | The way to arrange data | enum `date,offer,country` | N |
-| product | filter data for specific product | enum `wall,video,custom,interstitial` | N |
+| product | filter data for specific product | enum `wall,video,custom,interstitial,customplus` | N |
 
 ### Notice
 * __dimension__ will give tacit consent to “date” if not set.
