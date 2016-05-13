@@ -143,215 +143,161 @@ __Notice__
 * In order to ensure the signature won't be abnormal when changing the request parameters, please make sure using the verification function we offer as the verification method.
 * If developer's request url contains parameters not mentioned above, these parameters will also join in the signature.
 
-##  Verification Function
+##  Signature Function
 __For PHP__
 ```php
-function verifySignature($url, $app_secret){
-    $sign = null;
+function signUrl($url, $app_secret)
+{
     $params = array();
     $url_parse = parse_url($url);
-    if (isset($url_parse['query'])){
+    if (isset($url_parse['query'])) {
         $query_arr = explode('&', $url_parse['query']);
-        if (!empty($query_arr)){
-            foreach($query_arr as $p){
-                if (strpos($p, '=') !== false){
+        if (!empty($query_arr)) {
+            foreach ($query_arr as $p) {
+                if (strpos($p, '=') !== false) {
                     list($k, $v) = explode('=', $p);
-                    if($k == "sign"){
-                        $sign = $v;
-                    }else{
-                        $params[$k] = urldecode($v);
-                    }
+                    $params[$k] = urldecode($v);
                 }
             }
         }
     }
 
-    $str = '';
+    $before_md5 = '';
     ksort($params);
     foreach ($params as $k => $v) {
-        $str .= "{$k}={$v}";
+        $before_md5 .= "{$k}={$v}";
     }
-    $str .= $app_secret;
+    $before_md5 .= $app_secret;
 
-    return $sign == md5($str);
+    $sign = md5($before_md5);
+    return "{$url}&sign={$sign}";
 }
 ```
 
 __For Java__
 ```java
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
+ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLDecoder;
-import java.util.TreeMap;
+import java.security.GeneralSecurityException;
+import java.security.MessageDigest;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-import java.security.MessageDigest;
-import java.security.GeneralSecurityException;
+import java.util.TreeMap;
 
 public class AdxmiSign {
-    /**
-     * Signature Generation Algorithm
-     *
-     * @param HashMap
-     *            <String,String> params Request paramenters set, all parameters
-     *            need to convert to string type before this
-     * @param String
-     *            callbackToken The secret key from Adxmi Developer Control
-     *            Panel Setting
-     * @return String
-     * @throws IOException
-     */
-    public static String getSignature(HashMap<String, String> params,
-            String callbackToken) throws IOException {
-        // Sort the parameters in ascending order
-        Map<String, String> sortedParams = new TreeMap<String, String>(params);
+	/**
+	 * Signature Generation Algorithm
+	 * 
+	 * @param HashMap
+	 *            <String,String> params Request paramenters set, all parameters
+	 *            need to convert to string type before this
+	 * @param String
+	 *            appSecret The secret key for your application
+	 * @return String
+	 * @throws IOException
+	 */
+	public static String getSignature(HashMap<String, String> params,
+			String appSecret) throws IOException {
+		// Sort the parameters in ascending order
+		Map<String, String> sortedParams = new TreeMap<String, String>(params);
 
-        Set<Map.Entry<String, String>> entrys = sortedParams.entrySet();
-        // Traverse the set after sorting, connect all the parameters as
-        // "key=value" format
-        StringBuilder basestring = new StringBuilder();
-        for (Map.Entry<String, String> param : entrys) {
-            basestring.append(param.getKey()).append("=")
-                    .append(param.getValue());
-        }
-        basestring.append(callbackToken);
-        // System.out.println(basestring.toString());
-        // Calculate signature using MD5
-        byte[] bytes = null;
-        try {
-            MessageDigest md5 = MessageDigest.getInstance("MD5");
-            bytes = md5.digest(basestring.toString().getBytes("UTF-8"));
-        } catch (GeneralSecurityException ex) {
-            throw new IOException(ex);
-        }
-        // Convert the MD5 output binary result to lowercase hexadecimal result.
-        StringBuilder sign = new StringBuilder();
-        for (int i = 0; i < bytes.length; i++) {
-            String hex = Integer.toHexString(bytes[i] & 0xFF);
-            if (hex.length() == 1) {
-                sign.append("0");
-            }
-            sign.append(hex);
-        }
-        return sign.toString();
-    }
+		Set<Map.Entry<String, String>> entrys = sortedParams.entrySet();
+		// Traverse the set after sorting, connect all the parameters as
+		// "key=value" format
+		StringBuilder basestring = new StringBuilder();
+		for (Map.Entry<String, String> param : entrys) {
+			basestring.append(param.getKey()).append("=")
+					.append(param.getValue());
+		}
+		basestring.append(appSecret);
+		// System.out.println(basestring.toString());
+		// Calculate signature using MD5
+		byte[] bytes = null;
+		try {
+			MessageDigest md5 = MessageDigest.getInstance("MD5");
+			bytes = md5.digest(basestring.toString().getBytes("UTF-8"));
+		} catch (GeneralSecurityException ex) {
+			throw new IOException(ex);
+		}
+		// Convert the MD5 output binary result to lowercase hexadecimal result.
+		StringBuilder sign = new StringBuilder();
+		for (int i = 0; i < bytes.length; i++) {
+			String hex = Integer.toHexString(bytes[i] & 0xFF);
+			if (hex.length() == 1) {
+				sign.append("0");
+			}
+			sign.append(hex);
+		}
+		return sign.toString();
+	}
 
-    /**
-     * Calculate signature with a completed unsigned URL, append the signature
-     * at the end of this URL.
-     *
-     * @param String
-     *            url The completed unsigned URL
-     * @param String
-     *            callbackToken Secret key for calculating signature
-     * @return String
-     * @throws IOException
-     *             , MalformedURLException
-     */
-    public static String getUrlSignature(String url, String callbackToken)
-            throws IOException, MalformedURLException {
-        try {
-            URL urlObj = new URL(url);
-            String query = urlObj.getQuery();
-            String[] params = query.split("&");
-            Map<String, String> map = new HashMap<String, String>();
-            for (String each : params) {
-                String name = each.split("=")[0];
-                String value;
-                try {
-                    value = URLDecoder.decode(each.split("=")[1], "UTF-8");
-                } catch (UnsupportedEncodingException e) {
-                    value = "";
-                }
-                map.put(name, value);
-            }
-            String signature = getSignature((HashMap<String, String>) map,
-                    callbackToken);
-            return url + "&sign=" + signature;
-        } catch (MalformedURLException e) {
-            throw e;
-        } catch (IOException e) {
-            throw e;
-        }
-    }
-
-    /**
-     * Check the completed URL with signature parameter. Check the signature is
-     * correct or not.
-     *
-     * @param String
-     *            url The completed URL with signature parameter
-     * @param String
-     *            callbackToken Secret key for calculating signature
-     * @return boolean
-     */
-    public static boolean verifySignature(String signedUrl,
-            String callbackToken) {
-        String urlSign = "";
-        try {
-            URL urlObj = new URL(signedUrl);
-            String query = urlObj.getQuery();
-            String[] params = query.split("&");
-            Map<String, String> map = new HashMap<String, String>();
-            for (String each : params) {
-                String name = each.split("=")[0];
-                String value;
-                try {
-                    value = URLDecoder.decode(each.split("=")[1], "UTF-8");
-                } catch (UnsupportedEncodingException e) {
-                    value = "";
-                }
-                if ("sign".equals(name)) {
-                    urlSign = value;
-                } else {
-                    map.put(name, value);
-                }
-            }
-            if ("".equals(urlSign)) {
-                return false;
-            } else {
-                String signature = getSignature((HashMap<String, String>) map,
-                        callbackToken);
-                return urlSign.equals(signature);
-            }
-        } catch (MalformedURLException e) {
-            return false;
-        } catch (IOException e) {
-            return false;
-        }
-    }
+	/**
+	 * Calculate signature with a completed unsigned URL, append the signature
+	 * at the end of this URL.
+	 * 
+	 * @param String
+	 *            url The URL to be signed
+	 * @param String
+	 *            appSecret The secret key for your application
+	 * @return String
+	 * @throws IOException
+	 *             , MalformedURLException
+	 */
+	public static String signUrl(String url, String appSecret) throws Exception {
+		try {
+			URL urlObj = new URL(url);
+			String query = urlObj.getQuery();
+			String[] params = query.split("&");
+			Map<String, String> map = new HashMap<String, String>();
+			for (String each : params) {
+				String name = each.split("=")[0];
+				String value;
+				try {
+					value = URLDecoder.decode(each.split("=")[1], "UTF-8");
+				} catch (Exception e) {
+					value = "";
+				}
+				map.put(name, value);
+			}
+			String signature = getSignature((HashMap<String, String>) map,
+					appSecret);
+			return url + "&sign=" + signature;
+		} catch (MalformedURLException e) {
+			throw e;
+		} catch (IOException e) {
+			throw e;
+		}
+	}
 }
 ```
 
 __For Python__
 ```python
 from urlparse import urlparse
-from urllib import unquote
+from urllib import unquote_plus
 from hashlib import md5
 
-def verify_signature(url, app_secret):
-    sign = None
-    params = dict()
+def signUrl(url, app_secret):
+    params = {}
     url_parse = urlparse(url)
     query = url_parse.query
     query_array = query.split('&')
+
     for group in query_array:
         k, v = group.split('=')
-        if k == 'sign':
-            sign = v
-        else:
-            params[k] = unquote(v)
+        params[k] = unquote_plus(v)
+    del k, v
 
-    str = ''
-    sorted_params = sorted(params.items(), key = lambda d:d[0])
-    for k, v in sorted_params:
-        str += '%s=%s' % (k, v)
-    str += app_secret
+    sorted_params = sorted(params.items(), key=lambda d: d[0])
+
+    before_md5 = ''.join(['%s=%s' % (k, v) for k, v in sorted_params])
+    before_md5 += app_secret
 
     m = md5()
-    m.update(str)
-    return sign == m.hexdigest()
+    m.update(before_md5)
+    return'%s&sign=%s' % (url, m.hexdigest())
 ```
+
