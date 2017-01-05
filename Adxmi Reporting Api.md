@@ -29,7 +29,7 @@ Here is the general principle of Adxmi Reporting Api
 * Data for all products will be returned if __product__ is not set.
 
 ### Example
-http://reporting.yyapi.net/v1/data?appid=93ffeb94fd876e87&start_date=2015-12-05&end_date=2015-12-14&dimension=date&product=custom&sign=e07dc14f319c1dc3da855479804db48b
+http://reporting.yyapi.net/v1/data?appid=d00eab6fb70c2e11&start_date=2017-01-01&end_date=2017-01-05&dimension=date&product=wall&sign=7657ad3c0e14c584c61f88419e28228f
 
 ## Response Field
 ### Response Parameter by date dimension
