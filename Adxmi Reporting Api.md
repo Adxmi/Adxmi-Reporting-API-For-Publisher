@@ -15,14 +15,14 @@ Here is the general principle of Adxmi Reporting Api
 > http://reporting.yyapi.net/v1/data
 
 ## Request Parameter
-| Parameter | Description | Type | Mandatory |
-| ---- | ---- | ---- | ---- |
-| app_id | Apply from www.adxmi.com for your application | string | Y |
-| start_date | The date you wish to start with | date (yyyy-mm-dd) | Y |
-| end_date | The date you wish to end with | date (yyyy-mm-dd) | Y |
-| sign | Signature for query parameters. See [Signature Algorithm](#sign-algo) for detail | string | Y |
-| dimension | The way to arrange data | enum `date,offer,country` | N |
-| product | filter data for specific product | enum `wall,video,custom,interstitial,customplus` | N |
+| Parameter  | Description                                                                      | Type                                                 | Mandatory |
+|------------|----------------------------------------------------------------------------------|------------------------------------------------------|-----------|
+| app_id     | Apply from www.adxmi.com for your application                                    | string                                               | Y         |
+| start_date | The date you wish to start with                                                  | date (yyyy-mm-dd)                                    | Y         |
+| end_date   | The date you wish to end with                                                    | date (yyyy-mm-dd)                                    | Y         |
+| sign       | Signature for query parameters. See [Signature Algorithm](#sign-algo) for detail | string                                               | Y         |
+| dimension  | The way to arrange data                                                          | enum `date,offer,country`                            | N         |
+| product    | filter data for specific product                                                 | enum `wall,video,custom,interstitial,customplus,api` | N         |
 
 ### Notice
 * __dimension__ will give tacit consent to “date” if not set.
@@ -190,7 +190,7 @@ import java.util.TreeMap;
 public class AdxmiSign {
 	/**
 	 * Signature Generation Algorithm
-	 * 
+	 *
 	 * @param HashMap
 	 *            <String,String> params Request paramenters set, all parameters
 	 *            need to convert to string type before this
@@ -237,7 +237,7 @@ public class AdxmiSign {
 	/**
 	 * Calculate signature with a completed unsigned URL, append the signature
 	 * at the end of this URL.
-	 * 
+	 *
 	 * @param String
 	 *            url The URL to be signed
 	 * @param String
