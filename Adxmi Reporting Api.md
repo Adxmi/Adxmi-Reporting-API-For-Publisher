@@ -17,7 +17,7 @@ Here is the general principle of Adxmi Reporting Api
 ## Request Parameter
 | Parameter  | Description                                                                      | Type                                                 | Mandatory |
 |------------|----------------------------------------------------------------------------------|------------------------------------------------------|-----------|
-| app_id     | Apply from www.adxmi.com for your application                                    | string                                               | Y         |
+| appid      | Apply from www.adxmi.com for your application                                    | string                                               | Y         |
 | start_date | The date you wish to start with                                                  | date (yyyy-mm-dd)                                    | Y         |
 | end_date   | The date you wish to end with                                                    | date (yyyy-mm-dd)                                    | Y         |
 | sign       | Signature for query parameters. See [Signature Algorithm](#sign-algo) for detail | string                                               | Y         |
